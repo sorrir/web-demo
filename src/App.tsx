@@ -51,6 +51,7 @@ const App: React.FC = () => {
     for (var comp of configuration.components) {
       if (comp === component) {
         comp.state.events.push(event);
+        console.log(event);
       }
     }
     setConfiguration(configuration);
@@ -82,15 +83,15 @@ const App: React.FC = () => {
             <Button variant="contained">Reset</Button>
           </Toolbar>
         </AppBar>
-        <p>
+        <div>
          {configuration.components.map(c => {
             return (
               <div>
-                <ComponentComp c={c} events={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent}></ComponentComp>
+                <ComponentComp c={c} eventTypes={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent}></ComponentComp>
               </div>
             )
          })}
-        </p>
+        </div>
       </header>
     </div>
   );

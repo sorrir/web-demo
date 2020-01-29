@@ -58,7 +58,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
             {props.events.map(e => {
                 return (
                     <div>
-                    {e.type}/{e.port}
+                    {e.port}.{e.type}
                     </div>
                 )
             })}
@@ -69,13 +69,12 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
 
   export interface ComponentCompProps {
     c: Component<any,any>,
-    events:object,
+    eventTypes:{[key:string]: any},
     enqueue: (component: Component<any, any>, event: Event<any, any>) => void,
   }
   
   export const ComponentComp: React.FC<ComponentCompProps> = (props) => {
   
-    const [state, setState] = useState(props.c.state);
     const [portToSendEvent, setPortToSendEvent] = useState("");
     const [eventToSend, setEventToSend] = useState("");
 
@@ -91,9 +90,9 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                     {props.c.ports.map(p => p.name + ",")}
                 ]
                 {
-                    (isStateMachineState(state)) ? (<StateMachineStateComp s={state}></StateMachineStateComp>) : JSON.stringify(state)
+                    (isStateMachineState(props.c.state)) ? (<StateMachineStateComp s={props.c.state}></StateMachineStateComp>) : JSON.stringify(props.c.state)
                 }
-                <EventComp events={state.events}/>
+                <EventComp events={props.c.state.events}/>
                 <FormControl className={classes.formControl}>
                   <InputLabel id="port-select-label">Port:</InputLabel>
                   <Select
@@ -121,7 +120,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                     onChange={(event: React.ChangeEvent<{ value: unknown }>) => setEventToSend(event.target.value as string)} 
                   >
                       {
-                        Object.keys(props.events).map(e => {
+                        Object.keys(props.eventTypes).map(e => {
                           return (
                               <MenuItem value={e.toString()}>{e.toString()}</MenuItem>
                           )
@@ -131,7 +130,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
             </CardContent>
             <CardActions>
               <Button size="small" onClick={ () => 
-                props.enqueue(props.c, {type: eventToSend, port: portToSendEvent} as Event<any,any>)
+                props.enqueue(props.c, {type: props.eventTypes[eventToSend], port: portToSendEvent} as Event<any,any>)
               }>Enqueue</Button>
             </CardActions>
       </Card>

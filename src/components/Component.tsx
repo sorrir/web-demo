@@ -47,15 +47,15 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
     )
   }
   
-  function isStateMachineState(state: AbstractState<any, any, any> | StateMachineState<any, any, any, any>) : state is StateMachineState<any, any, any, any> {
+  function isStateMachineState(state: AbstractState<any, any, any> | StateMachineState<any, any, any, any> | undefined) : state is StateMachineState<any, any, any, any> {
     return (state as StateMachineState<any, any, any, any>).state.fsm !== undefined;
   }
 
-  export const EventComp: React.FC<{events: Event<any,any>[]}> = (props) => {
+  export const EventComp: React.FC<{events: Event<any,any>[] | undefined}> = (props) => {
       return (
         <div>
             Events: [
-            {props.events.map(e => {
+            {props.events && props.events.map(e => {
                 return (
                     <div>
                     {e.port}.{e.type}
@@ -69,6 +69,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
 
   export interface ComponentCompProps {
     c: Component<any,any>,
+    c_state: AbstractState<any, any, any> | undefined,
     eventTypes:{[key:string]: any},
     enqueue: (component: Component<any, any>, event: Event<any, any>) => void,
   }
@@ -90,9 +91,9 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                     {props.c.ports.map(p => p.name + ",")}
                 ]
                 {
-                    (isStateMachineState(props.c.state)) ? (<StateMachineStateComp s={props.c.state}></StateMachineStateComp>) : JSON.stringify(props.c.state)
+                    (isStateMachineState(props.c_state)) ? (<StateMachineStateComp s={props.c_state}></StateMachineStateComp>) : JSON.stringify(props.c_state)
                 }
-                <EventComp events={props.c.state.events}/>
+                <EventComp events={props.c_state?.events}/>
                 <FormControl className={classes.formControl}>
                   <InputLabel id="port-select-label">Port:</InputLabel>
                   <Select

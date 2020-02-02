@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 
 import * as _ from 'lodash';
 
@@ -55,7 +55,7 @@ const App: React.FC = () => {
     ])
   }
 
-  const [configurationState, setConfigurationState] = useState(startState);
+  const [configurationState, setConfigurationState] = useState(_.cloneDeep(startState));
 
   function enqueueEvent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>, event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) {
     let newConfigurationState = {...configurationState};
@@ -70,11 +70,9 @@ const App: React.FC = () => {
   };
 
   const compToEventTypeMap = new Map<Component<any, any>, object>();
-
   compToEventTypeMap.set(barrier, BarrierEventTypes);
   compToEventTypeMap.set(DSB, DSBEventTypes);
-
-
+  
   const classes = useStyles();
 
   return (
@@ -91,7 +89,7 @@ const App: React.FC = () => {
                 setConfigurationState(configurationStep(configuration, configurationState));
               }
               }>Step</Button>
-            {/* <Button variant="contained" onClick={() => setConfiguration(_.cloneDeep(startConfiguration))}>Reset</Button> */}
+            <Button variant="contained" onClick={() => setConfigurationState(_.cloneDeep(startState))}>Reset</Button>
           </Toolbar>
         </AppBar>
         <div>

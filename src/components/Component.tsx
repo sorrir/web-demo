@@ -102,7 +102,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                     value={portToSendEvent}
                     onChange={(event: React.ChangeEvent<{ value: unknown }>) => {setPortToSendEvent(event.target.value as string)}} 
                   >
-                      <MenuItem value="">
+                      <MenuItem value={undefined}>
                           <em>Internal</em>
                       </MenuItem>
                       {props.c.ports.map(p => {

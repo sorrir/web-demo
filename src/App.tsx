@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState} from 'react';
 
 import * as _ from 'lodash';
 
@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
-import { Event, Component, Configuration, ConfigurationState, AbstractState, barrier_state, DSB_state } from "sorrir-framework";
+import { Event, Component, ConfigurationState, AbstractState, barrier_state, DSB_state } from "sorrir-framework";
 import { createConnection, configurationStep } from "sorrir-framework";
 import { barrier, BarrierPorts } from "sorrir-framework";
 import { DSB, DSB_Ports } from "sorrir-framework";

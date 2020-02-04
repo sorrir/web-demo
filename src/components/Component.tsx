@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-
-import Card from '@material-ui/core/Card';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
-import MenuItem from '@material-ui/core/MenuItem';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import InputLabel from '@material-ui/core/InputLabel';
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import DeleteIcon from '@material-ui/icons/Delete';
+import React, { useState } from 'react';
+import { AbstractState, Component, Event, StateMachineState } from "sorrir-framework";
 
-import { AbstractState, StateMachineState, Component, Event } from "sorrir-framework";
+
+
+
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
     card: {
+      margin: theme.spacing(1),
       minWidth: 275,
     },
     bullet: {
@@ -51,18 +53,29 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
     return (state as StateMachineState<any, any, any, any>).state.fsm !== undefined;
   }
 
-  export const EventComp: React.FC<{events: Event<any,any>[] | undefined}> = (props) => {
+  interface EventCompProps {
+    events: Event<any,any>[] | undefined,
+    dequeue: (event: Event<any, any>) => void,
+  }
+
+  const EventComp: React.FC<EventCompProps> = (props) => {
       return (
-        <div>
-            Events: [
+        <div className="Component-EventBox">
+            <div>
+            Events:
+            </div> 
+            <div className="Component-EventList">
             {props.events && props.events.map(e => {
                 return (
                     <div>
                     {e.port}.{e.type}
+                    <Button size="small" onClick={() => props.dequeue(e)}>
+                      <DeleteIcon/>
+                    </Button>
                     </div>
                 )
             })}
-            ]
+            </div>
         </div>
       )
   }
@@ -72,6 +85,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
     c_state: AbstractState<any, any, any> | undefined,
     eventTypes:{[key:string]: any},
     enqueue: (component: Component<any, any>, event: Event<any, any>) => void,
+    dequeue: (event: Event<any, any>) => void
   }
   
   export const ComponentComp: React.FC<ComponentCompProps> = (props) => {
@@ -84,16 +98,12 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
     return (
         <Card className={classes.card} variant="outlined">
             <CardContent>
-                <Typography variant="h5" component="h2">
                     Component: {props.c.name}
-                </Typography>
-                Ports: [
-                    {props.c.ports.map(p => p.name + ",")}
-                ]
                 {
                     (isStateMachineState(props.c_state)) ? (<StateMachineStateComp s={props.c_state}></StateMachineStateComp>) : JSON.stringify(props.c_state)
                 }
-                <EventComp events={props.c_state?.events}/>
+                <EventComp events={props.c_state?.events} dequeue={props.dequeue}/>
+                <div className="Component-EventEnqueue">
                 <FormControl className={classes.formControl}>
                   <InputLabel id="port-select-label">Port:</InputLabel>
                   <Select
@@ -128,12 +138,11 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                       })}
                   </Select>
                 </FormControl>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={ () => 
+                <Button size="small" onClick={ () => 
                 props.enqueue(props.c, {type: props.eventTypes[eventToSend], port: portToSendEvent} as Event<any,any>)
-              }>Enqueue</Button>
-            </CardActions>
+              }><AddBoxIcon/></Button>
+              </div>
+            </CardContent>
       </Card>
     )
   }

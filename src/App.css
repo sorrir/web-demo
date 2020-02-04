@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+
+.Component-EventBox {
+  display: flex;
+  flex-direction: row;
+}
+
+.Component-EventList {
+  display: flex;
+  flex-direction: column;
+}
+
+.Component-EventEnqueue {
+  display: flex;
+  flex-direction: row;
+  align-items: "baseline";
+}

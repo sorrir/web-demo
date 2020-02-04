@@ -1,6 +1,7 @@
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import GridList from '@material-ui/core/GridList';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -62,12 +63,24 @@ const App: React.FC = () => {
     const comp_state = newConfigurationState.componentState.get(component);
     if (comp_state !== undefined) {
       comp_state.events.push(event);
-      console.log(event);
     }
 
     setConfigurationState(newConfigurationState);
   };
 
+  function deleteEvent_internalcomponent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>, event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) {
+    let newConfigurationState = {...configurationState};
+
+    const comp_state = newConfigurationState.componentState.get(component);
+    if (comp_state !== undefined) {
+      _.pull(comp_state.events, event);
+    }
+
+    setConfigurationState(newConfigurationState);
+  }
+
+  const deleteEvent = (component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) => (event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) => deleteEvent_internalcomponent(component, event);
+  
   const compToEventTypeMap = new Map<Component<any, any>, object>();
   compToEventTypeMap.set(barrier, BarrierEventTypes);
   compToEventTypeMap.set(DSB, DSBEventTypes);
@@ -92,15 +105,13 @@ const App: React.FC = () => {
             <Button variant="contained" onClick={() => setConfigurationState(_.cloneDeep(startState))}>Reset</Button>
           </Toolbar>
         </AppBar>
-        <div>
+        <GridList>
          {configuration.components.map(c => {
             return (
-              <div>
-                <ComponentComp c={c} c_state={configurationState.componentState.get(c)} eventTypes={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent}></ComponentComp>
-              </div>
+                <ComponentComp c={c} c_state={configurationState.componentState.get(c)} eventTypes={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent} dequeue={deleteEvent(c)}></ComponentComp>
             )
          })}
-        </div>
+        </GridList>
       </header>
     </div>
   );

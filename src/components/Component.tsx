@@ -85,7 +85,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
         <Card className={classes.card} variant="outlined">
             <CardContent>
                 <Typography variant="h5" component="h2">
-                    Component
+                    Component: {props.c.name}
                 </Typography>
                 Ports: [
                     {props.c.ports.map(p => p.name + ",")}

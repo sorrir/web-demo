@@ -1,23 +1,19 @@
-import React, { useState} from 'react';
-
-import * as _ from 'lodash';
-
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-
-import { Event, Component, ConfigurationState, AbstractState, barrier_state, DSB_state } from "sorrir-framework";
-import { createConnection, configurationStep } from "sorrir-framework";
-import { barrier, BarrierPorts } from "sorrir-framework";
-import { DSB, DSB_Ports } from "sorrir-framework";
-import { BarrierEventTypes, DSBEventTypes, SensorEventTypes } from "sorrir-framework";
-
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import * as _ from 'lodash';
+import React, { useState } from 'react';
+import { barrier, BarrierEventTypes, BarrierPorts, barrier_state, Component, Configuration, configurationStep, createConnection, DSB, DSBEventTypes, DSB_Ports, DSB_state, Event, sensor, SensorEventTypes, SensorPorts, sensor_startstate } from "sorrir-framework";
 import './App.css';
+import { ComponentComp } from "./components/Component";
 
-import {ComponentComp} from "./components/Component";
+
+
+
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,19 +37,22 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const App: React.FC = () => {
 
-  const configuration = {
-    components: [barrier, DSB],
+  const configuration:Configuration  = {
+    components: [sensor, DSB, barrier],
     connections: [
-            createConnection(DSB, DSB_Ports.TO_BARRIER, barrier, BarrierPorts.FROM_DSB),
+      createConnection(sensor, SensorPorts.TO_DSB, DSB, DSB_Ports.FROM_SENSOR),
+      createConnection(DSB, DSB_Ports.TO_BARRIER, barrier, BarrierPorts.FROM_DSB),
     ]
-  };
-
-  const startState:ConfigurationState = {
-    componentState: new Map([
-      [barrier, barrier_state] as [Component<any, any>, AbstractState<any, any, any>],
-      [DSB, DSB_state] as [Component<any, any>, AbstractState<any, any, any>],
-    ])
   }
+  
+  let startState = {
+    componentState: new Map([
+      [barrier, barrier_state] as [any, any],
+      [sensor, sensor_startstate] as [any, any],
+      [DSB, DSB_state] as [any, any],
+    ]),
+  }
+  
 
   const [configurationState, setConfigurationState] = useState(_.cloneDeep(startState));
 
@@ -72,6 +71,7 @@ const App: React.FC = () => {
   const compToEventTypeMap = new Map<Component<any, any>, object>();
   compToEventTypeMap.set(barrier, BarrierEventTypes);
   compToEventTypeMap.set(DSB, DSBEventTypes);
+  compToEventTypeMap.set(sensor, SensorEventTypes);
   
   const classes = useStyles();
 

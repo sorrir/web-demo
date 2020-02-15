@@ -6,14 +6,15 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import * as _ from 'lodash';
-import React, { useState } from 'react';
-import { barrier, BarrierEventTypes, BarrierPorts, barrier_state, Component, Configuration, configurationStep, createConnection, DSB, DSBEventTypes, DSB_Ports, DSB_state, Event, sensor, SensorEventTypes, SensorPorts, sensor_startstate } from "sorrir-framework";
+import React, { useState, useEffect } from 'react';
+import { barrier, BarrierEventTypes, BarrierPorts, barrier_state, Component, Configuration, configurationStep, createConnection, DSB, DSBEventTypes, DSB_Ports, DSB_state, Event, sensor, SensorEventTypes, SensorPorts, sensor_startstate, stateSpace, allConfigurationSteps, depGraphToDot } from "sorrir-framework";
 import './App.css';
 import { ComponentComp } from "./components/Component";
+import TextField from '@material-ui/core/TextField';
 
 
 
-
+declare var Viz:any;
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -38,6 +39,20 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const App: React.FC = () => {
 
+  useEffect(() => {
+    const script = document.createElement('script');
+  
+    script.src = "http://webgraphviz.com//viz.js";
+    script.async = true;
+  
+    document.body.appendChild(script);
+  
+    return () => {
+      document.body.removeChild(script);
+    }
+  }, []);
+  
+
   const configuration:Configuration  = {
     components: [sensor, DSB, barrier],
     connections: [
@@ -56,6 +71,20 @@ const App: React.FC = () => {
   
 
   const [configurationState, setConfigurationState] = useState(_.cloneDeep(startState));
+  const [svg, setSVG] = useState("");
+  const [spaceSize, setSpaceSize] = useState(10);
+
+  function createStateSpace() {
+    var data = depGraphToDot(stateSpace(configuration, configurationState, allConfigurationSteps, spaceSize));
+    // Generate the Visualization of the Graph into "svg".
+    var svg = Viz(data, "svg");
+    setSVG(svg);
+  }
+
+  function reset() {
+    setConfigurationState(_.cloneDeep(startState));
+    setSVG("");
+  }
 
   function enqueueEvent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>, event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) {
     let newConfigurationState = {...configurationState};
@@ -98,20 +127,30 @@ const App: React.FC = () => {
             <Typography variant="h6" className={classes.title}>
               Sorrir - MVP
             </Typography>
-            <Button variant="contained" color="secondary" onClick={() => {
+            <Button variant="contained" onClick={() => {
                 setConfigurationState(configurationStep(configuration, configurationState));
               }
               }>Step</Button>
-            <Button variant="contained" onClick={() => setConfigurationState(_.cloneDeep(startState))}>Reset</Button>
+            <form className={classes.root} noValidate autoComplete="off">
+              <TextField id="outlined-basic" label="Size" type="number" variant="outlined" size="small" defaultValue={spaceSize} onChange={(e) => setSpaceSize(+e.target.value)}/>
+            </form>
+            <Button variant="contained" onClick={createStateSpace}>
+              StateSpace</Button>
+            <Button variant="contained" onClick={reset}>Reset</Button>
           </Toolbar>
         </AppBar>
-        <GridList>
-         {configuration.components.map(c => {
-            return (
-                <ComponentComp c={c} c_state={configurationState.componentState.get(c)} eventTypes={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent} dequeue={deleteEvent(c)}></ComponentComp>
-            )
-         })}
-        </GridList>
+        <div className="App-Canvas">
+          <GridList>
+           {configuration.components.map(c => {
+              return (
+                  <ComponentComp c={c} c_state={configurationState.componentState.get(c)} eventTypes={compToEventTypeMap.get(c) || {}} enqueue={enqueueEvent} dequeue={deleteEvent(c)}></ComponentComp>
+              )
+           })}
+          </GridList>
+          <hr/>
+          <div id="statespace" dangerouslySetInnerHTML={{__html:svg}}>
+          </div>
+        </div>
       </header>
     </div>
   );

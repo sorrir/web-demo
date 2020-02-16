@@ -7,7 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import * as _ from 'lodash';
 import React, { useState, useEffect } from 'react';
-import { barrier, BarrierEventTypes, BarrierPorts, barrier_state, Component, Configuration, configurationStep, createConnection, DSB, DSBEventTypes, DSB_Ports, DSB_state, Event, sensor, SensorEventTypes, SensorPorts, sensor_startstate, stateSpace, allConfigurationSteps, depGraphToDot } from "sorrir-framework";
+import { barrier, BarrierEventTypes, BarrierPorts, barrier_state, Component, Configuration, configurationStep, createConnection, DSB, DSBEventTypes, DSB_Ports, DSB_state, Event, sensor, SensorEventTypes, SensorPorts, sensor_startstate, stateSpace, allConfigurationSteps, depGraphToDot, user, user_startstate, UserPorts, UserEventTypes } from "sorrir-framework";
 import './App.css';
 import { ComponentComp } from "./components/Component";
 import TextField from '@material-ui/core/TextField';
@@ -52,12 +52,13 @@ const App: React.FC = () => {
     }
   }, []);
   
-
   const configuration:Configuration  = {
-    components: [sensor, DSB, barrier],
+    components: [barrier, DSB, sensor, user],
     connections: [
       createConnection(sensor, SensorPorts.TO_DSB, DSB, DSB_Ports.FROM_SENSOR),
       createConnection(DSB, DSB_Ports.TO_BARRIER, barrier, BarrierPorts.FROM_DSB),
+      createConnection(DSB, DSB_Ports.TO_USER, user, UserPorts.FROM_DSB),
+      createConnection(user, UserPorts.TO_DSB, DSB, DSB_Ports.FROM_USER),
     ]
   }
   
@@ -66,6 +67,7 @@ const App: React.FC = () => {
       [barrier, barrier_state] as [any, any],
       [sensor, sensor_startstate] as [any, any],
       [DSB, DSB_state] as [any, any],
+      [user, user_startstate] as [any, any],
     ]),
   }
   
@@ -86,7 +88,7 @@ const App: React.FC = () => {
     setSVG("");
   }
 
-  function enqueueEvent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>, event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) {
+  function enqueueEvent(component:  Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports> | Component<UserEventTypes, UserPorts>, event:  Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports> & Event<UserEventTypes, UserPorts>) {
     let newConfigurationState = {...configurationState};
 
     const comp_state = newConfigurationState.componentState.get(component);
@@ -97,7 +99,7 @@ const App: React.FC = () => {
     setConfigurationState(newConfigurationState);
   };
 
-  function deleteEvent_internalcomponent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>, event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) {
+  function deleteEvent_internalcomponent(component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports> | Component<UserEventTypes, UserPorts> , event: Event<UserEventTypes, UserPorts> & Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports> & Event<UserEventTypes, UserPorts>) {
     let newConfigurationState = {...configurationState};
 
     const comp_state = newConfigurationState.componentState.get(component);
@@ -108,12 +110,13 @@ const App: React.FC = () => {
     setConfigurationState(newConfigurationState);
   }
 
-  const deleteEvent = (component: Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) => (event: Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes, DSB_Ports>) => deleteEvent_internalcomponent(component, event);
+  const deleteEvent = (component: Component<UserEventTypes, UserPorts> | Component<BarrierEventTypes, BarrierPorts> | Component<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports>) => (event: Event<UserEventTypes, UserPorts> & Event<BarrierEventTypes, BarrierPorts> & Event<BarrierEventTypes | SensorEventTypes | DSBEventTypes | UserEventTypes, DSB_Ports>) => deleteEvent_internalcomponent(component, event);
   
   const compToEventTypeMap = new Map<Component<any, any>, object>();
   compToEventTypeMap.set(barrier, BarrierEventTypes);
   compToEventTypeMap.set(DSB, DSBEventTypes);
   compToEventTypeMap.set(sensor, SensorEventTypes);
+  compToEventTypeMap.set(user, UserEventTypes);
   
   const classes = useStyles();
 

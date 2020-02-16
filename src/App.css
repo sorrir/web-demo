@@ -53,3 +53,8 @@
   flex-direction: row;
   align-items: "baseline";
 }
+
+.App-Canvas {
+  display: flex;
+  flex-direction: column;
+}

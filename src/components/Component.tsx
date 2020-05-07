@@ -115,7 +115,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
                       <MenuItem value={undefined}>
                           <em>Internal</em>
                       </MenuItem>
-                      {props.c.ports.map(p => {
+                      {props.c.ports.map((p:Port<any,any>) => {
                           return (
                               <MenuItem value={p.name}>{p.name}</MenuItem>
                           )

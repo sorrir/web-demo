@@ -61,7 +61,7 @@ const App: React.FC = () => {
     useEffect(() => {
         const script = document.createElement('script');
 
-        script.src = "http://webgraphviz.com//viz.js";
+        script.src = './viz.js';
         script.async = true;
 
         document.body.appendChild(script);

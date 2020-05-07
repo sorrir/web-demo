@@ -9,10 +9,7 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React, { useState } from 'react';
-import { AbstractState, Component, Event, StateMachineState } from "sorrir-framework";
-
-
-
+import { AbstractState, Component, Event, StateMachineState, Port } from 'sorrir-framework';
 
 
 const useStyles = makeStyles((theme: Theme) => 
@@ -55,7 +52,7 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
 
   interface EventCompProps {
     events: Event<any,any>[] | undefined,
-    dequeue: (event: Event<any, any>) => void,
+    dequeue: (event: Event<any,any>) => void,
   }
 
   const EventComp: React.FC<EventCompProps> = (props) => {
@@ -84,8 +81,8 @@ const StateMachineStateComp: React.FC<{s: StateMachineState<any, any, any, any>}
     c: Component<any,any>,
     c_state: AbstractState<any, any, any> | undefined,
     eventTypes:{[key:string]: any},
-    enqueue: (component: Component<any, any>, event: Event<any, any>) => void,
-    dequeue: (event: Event<any, any>) => void
+    enqueue: (component: Component<any, any>, event: Event<any,any>) => void,
+    dequeue: (event: Event<any,any>) => void
   }
   
   export const ComponentComp: React.FC<ComponentCompProps> = (props) => {
